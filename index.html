@@ -7,12 +7,12 @@
 <div class="hud"><div class="pill">🎄 Коридор <span id="level">1</span> / 100</div><div class="pill">❤️ <span id="hp" class="heart">100</span></div><div class="pill">❄️ <span id="score">0</span></div></div>
 <div class="hint">WASD / стрелки — движение · SPACE — снежок · 100 коридоров</div>
 <div class="touch"><div class="pad"><button data-key="ArrowLeft">◀</button><button data-key="ArrowUp">▲</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button></div><div class="shoot"><button data-key="Space">❄️</button></div></div>
-<div class="overlay" id="start"><div class="panel"><h1>🎄 Snow Corridor 🎄</h1><p>Пробеги 100 рождественских коридоров, отбивайся от снеговиков снежками и постарайся сохранить здоровье!</p><p>Каждое касание снеговика отнимает 1 HP. У тебя 100 жизней.</p><button id="startBtn">Начать игру</button></div></div>
+<div class="overlay" id="start"><div class="panel"><h1>🎄 Snow Corridor 🎄</h1><p>Пробеги 100 рождественских коридоров, отбивайся от снеговиков снежками и постарайся сохранить здоровье!</p><p>Каждое касание снеговика отнимает 1 HP. У тебя 100 жизней.</p><button id="startBtn" type="button" onclick="window.startSnowCorridor()">Начать игру</button></div></div>
 <div class="overlay hidden" id="end"><div class="panel"><h1 id="endTitle">🎄 С Новым годом! 🎄</h1><p id="endText"></p><button id="again">Играть снова</button></div></div>
 <script>
 (()=>{const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');let W,H,player,keys={},snowmen=[],shots=[],level=1,hp=100,score=0,active=false,frame=0,invuln=0,doorFlash=0;
 const hpEl=document.getElementById('hp'),lvEl=document.getElementById('level'),scoreEl=document.getElementById('score');
-function resize(){W=canvas.width=innerWidth*devicePixelRatio;H=canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);W=innerWidth;H=innerHeight;canvas.width=W*devicePixelRatio;canvas.height=H*devicePixelRatio}
+function resize(){W=innerWidth;H=innerHeight;canvas.width=Math.round(W*devicePixelRatio);canvas.height=Math.round(H*devicePixelRatio);ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}
 addEventListener('resize',resize);resize();
 function init(){level=1;hp=100;score=0;frame=0;player={x:W/2,y:H*.78,r:15,speed:4.1};shots=[];keys={};spawn();active=true;document.getElementById('start').classList.add('hidden');document.getElementById('end').classList.add('hidden');hud()}
 function spawn(){snowmen=[];let n=Math.min(3+Math.floor(level/5),11);for(let i=0;i<n;i++)snowmen.push({x:100+Math.random()*(W-200),y:80+Math.random()*(H*.38),r:19,h:2,cd:80+Math.random()*100,wiggle:Math.random()*6})}
@@ -21,7 +21,7 @@ function shoot(){if(!active)return;shots.push({x:player.x,y:player.y-15,vy:-8,r:
 document.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();keys[e.key===' '?'Space':e.key]=true;if(e.key===' '&&!e.repeat)shoot()});
 document.addEventListener('keyup',e=>keys[e.key===' '?'Space':e.key]=false);
 document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true;if(k==='Space')shoot()});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false))});
-document.getElementById('startBtn').onclick=init;document.getElementById('again').onclick=init;
+window.startSnowCorridor=init;document.getElementById('startBtn').addEventListener('click',init);document.getElementById('again').addEventListener('click',init);
 function move(){if(keys.ArrowLeft||keys.a||keys.A)player.x-=player.speed;if(keys.ArrowRight||keys.d||keys.D)player.x+=player.speed;if(keys.ArrowUp||keys.w||keys.W)player.y-=player.speed;if(keys.ArrowDown||keys.s||keys.S)player.y+=player.speed;player.x=Math.max(42,Math.min(W-42,player.x));player.y=Math.max(70,Math.min(H-60,player.y));if(keys.Space&&frame%12===0)shoot()}
 function update(){
  if(!active)return;

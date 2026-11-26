@@ -23,9 +23,34 @@ document.addEventListener('keyup',e=>keys[e.key===' '?'Space':e.key]=false);
 document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true;if(k==='Space')shoot()});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false))});
 document.getElementById('startBtn').onclick=init;document.getElementById('again').onclick=init;
 function move(){if(keys.ArrowLeft||keys.a||keys.A)player.x-=player.speed;if(keys.ArrowRight||keys.d||keys.D)player.x+=player.speed;if(keys.ArrowUp||keys.w||keys.W)player.y-=player.speed;if(keys.ArrowDown||keys.s||keys.S)player.y+=player.speed;player.x=Math.max(42,Math.min(W-42,player.x));player.y=Math.max(70,Math.min(H-60,player.y));if(keys.Space&&frame%12===0)shoot()}
-function update(){if(!active)return;frame++;move();if(invuln>0)invuln--;snowmen.forEach(s=>{s.wiggle+=.04;s.x+=Math.sin(s.wiggle)*.7;s.y+=Math.sin(frame/45+s.wiggle)*.35;s.cd--;if(s.cd<=0){shots.push({x:s.x,y:s.y+12,vy:3.2+level*.025,r:7,enemy:true});s.cd=100+Math.random()*100-level*0.4}if(Math.hypot(s.x-player.x,s.y-player.y)<s.r+player.r){if(invuln===0){hp--;invuln=12;if(hp<=0)finish(false)}}});
-shots=shots.filter(b=>{b.y+=b.vy;if(b.enemy){if(Math.hypot(b.x-player.x,b.y-player.y)<b.r+player.r){if(invuln===0){hp-=5;invuln=25;if(hp<=0)finish(false)}return false}}else{for(let s of snowmen){if(Math.hypot(b.x-s.x,b.y-s.y)<b.r+s.r){s.h--;if(s.h<=0){snowmen=snowmen.filter(x=>x!==s);score+=10;hud()}return false}}}return b.y>-20&&b.y<H+20});
-if(snowmen.length===0){doorFlash++;if(doorFlash>60){doorFlash=0;level++;if(level>100){finish(true);return}spawn()}}}hud()}
+function update(){
+ if(!active)return;
+ frame++;move();if(invuln>0)invuln--;
+ snowmen.forEach(s=>{
+  s.wiggle+=.04;s.x+=Math.sin(s.wiggle)*.7;s.y+=Math.sin(frame/45+s.wiggle)*.35;s.cd--;
+  if(s.cd<=0){shots.push({x:s.x,y:s.y+12,vy:3.2+level*.025,r:7,enemy:true});s.cd=100+Math.random()*100-level*.4}
+  if(Math.hypot(s.x-player.x,s.y-player.y)<s.r+player.r&&invuln===0){hp--;invuln=12;if(hp<=0)finish(false)}
+ });
+ shots=shots.filter(b=>{
+  b.y+=b.vy;
+  if(b.enemy){
+   if(Math.hypot(b.x-player.x,b.y-player.y)<b.r+player.r){
+    if(invuln===0){hp-=5;invuln=25;if(hp<=0)finish(false)}
+    return false;
+   }
+  }else{
+   for(const s of snowmen){
+    if(Math.hypot(b.x-s.x,b.y-s.y)<b.r+s.r){
+     s.h--;if(s.h<=0){snowmen=snowmen.filter(x=>x!==s);score+=10;hud()}
+     return false;
+    }
+   }
+  }
+  return b.y>-20&&b.y<H+20;
+ });
+ if(snowmen.length===0){doorFlash++;if(doorFlash>60){doorFlash=0;level++;if(level>100){finish(true);return}spawn()}}
+ hud();
+}
 function finish(win){active=false;document.getElementById('endTitle').textContent=win?'🎉 С Новым годом! 🎉':'☃️ Игра окончена!';document.getElementById('endText').textContent=win?'Ты прошёл все 100 коридоров и спас праздник! С Новым годом!':'Ты дошёл до коридора '+level+' из 100. Очки: '+score+'. Попробуй ещё раз!';document.getElementById('end').classList.remove('hidden')}
 function draw(){ctx.clearRect(0,0,W,H);let grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#08263a');grad.addColorStop(1,'#0c4053');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
 // corridor walls & festive garlands
